@@ -22,7 +22,7 @@ public interface ITeacherService
     /**
      * 查询选择导师任务列表
      * 
-     * @param teacher 选择导师任务
+     * @param nickName 选择导师任务
      * @return 选择导师任务集合
      */
     public List<Teacher> selectTeacherList(String nickName);

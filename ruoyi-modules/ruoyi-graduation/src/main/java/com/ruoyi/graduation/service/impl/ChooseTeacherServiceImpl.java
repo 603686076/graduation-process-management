@@ -36,7 +36,7 @@ public class ChooseTeacherServiceImpl implements IChooseTeacherService
     /**
      * 查询选择导师任务列表
      * 
-     * @param String 选择导师任务
+     * @param nickName 选择导师任务
      * @return 选择导师任务
      */
     @Override

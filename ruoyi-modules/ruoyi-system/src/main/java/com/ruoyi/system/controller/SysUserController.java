@@ -1,11 +1,17 @@
 package com.ruoyi.system.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.system.api.domain.dto.TeacherUserDTO;
+import com.ruoyi.system.domain.Teacher;
+import com.ruoyi.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +36,6 @@ import com.ruoyi.common.security.annotation.PreAuthorize;
 import com.ruoyi.system.api.domain.SysRole;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
-import com.ruoyi.system.service.ISysPermissionService;
-import com.ruoyi.system.service.ISysPostService;
-import com.ruoyi.system.service.ISysRoleService;
-import com.ruoyi.system.service.ISysUserService;
 
 /**
  * 用户信息
@@ -55,6 +57,9 @@ public class SysUserController extends BaseController
 
     @Autowired
     private ISysPermissionService permissionService;
+
+    @Autowired
+    private ITeacherService teacherService;
 
     /**
      * 获取用户列表
@@ -90,10 +95,50 @@ public class SysUserController extends BaseController
         return AjaxResult.success(message);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Log(title = "用户管理", businessType = BusinessType.IMPORT)
+    @PreAuthorize(hasPermi = "system:user:import")
+    @PostMapping("/importDataTeacher")
+    public AjaxResult importDataTeacher(MultipartFile file, boolean updateSupport) throws Exception
+    {
+        ExcelUtil<TeacherUserDTO> util = new ExcelUtil<TeacherUserDTO>(TeacherUserDTO.class);
+        List<TeacherUserDTO> teacherUserDTOList = util.importExcel(file.getInputStream());
+        String operName = SecurityUtils.getUsername();
+        List<SysUser> userList = new ArrayList<>();
+        List<Teacher> teacherList = new ArrayList<>();
+        teacherUserDTOList.forEach(teacherUserDTO -> {
+            SysUser user = new SysUser();
+            user.setUserId(teacherUserDTO.getTeacherId());
+            user.setUserName(teacherUserDTO.getUserName());
+            user.setNickName(teacherUserDTO.getNickName());
+            user.setDeptId(teacherUserDTO.getDeptId());
+            user.setPhonenumber(teacherUserDTO.getPhonenumber());
+            user.setSex(teacherUserDTO.getSex());
+            userList.add(user);
+
+            Teacher teacher = new Teacher();
+            teacher.setId(teacherUserDTO.getTeacherId());
+            teacher.setTitle(teacherUserDTO.getTitle());
+            teacher.setQuantity(teacherUserDTO.getQuantity());
+            teacher.setDescription(teacherUserDTO.getDescription());
+            teacherList.add(teacher);
+        });
+        String messageUser = userService.importUser(userList, updateSupport, operName);
+        String messageTeacher = teacherService.importTeacher(teacherList, updateSupport, operName);
+        return AjaxResult.success(messageUser);
+    }
+
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) throws IOException
     {
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
+        util.importTemplateExcel(response, "用户数据");
+    }
+
+    @PostMapping("/importTemplateTeacher")
+    public void importTemplateTeacher(HttpServletResponse response) throws IOException
+    {
+        ExcelUtil<TeacherUserDTO> util = new ExcelUtil<TeacherUserDTO>(TeacherUserDTO.class);
         util.importTemplateExcel(response, "用户数据");
     }
 

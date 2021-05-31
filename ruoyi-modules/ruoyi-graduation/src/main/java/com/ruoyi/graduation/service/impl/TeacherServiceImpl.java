@@ -35,7 +35,7 @@ public class TeacherServiceImpl implements ITeacherService
     /**
      * 查询选择导师任务列表
      * 
-     * @param teacher 选择导师任务
+     * @param nickName 选择导师任务
      * @return 选择导师任务
      */
     @Override

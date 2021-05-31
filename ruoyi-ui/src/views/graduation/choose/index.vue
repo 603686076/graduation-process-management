@@ -1,6 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form
+      :model="queryParams"
+      ref="queryForm"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
+    >
       <el-form-item label="教师名" prop="nickName">
         <el-input
           v-model="queryParams.nickName"
@@ -11,8 +17,16 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-search"
+          size="mini"
+          @click="handleQuery"
+          >搜索</el-button
+        >
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
+          >重置</el-button
+        >
       </el-form-item>
     </el-form>
 
@@ -62,32 +76,53 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row> -->
 
-    <el-table v-loading="loading" :data="teacherList" @selection-change="handleSelectionChange">
+    <ul class="list-group list-group-striped">
+      <li class="list-group-item">
+        <svg-icon icon-class="user" />用户di
+        <div class="pull-right">{{ user.userId }}</div>
+      </li>
+      <li class="list-group-item">
+        <svg-icon icon-class="phone" />教师id
+        <div class="pull-right">{{ form.id }}</div>
+      </li>
+    </ul>
+    <el-table
+      v-loading="loading"
+      :data="teacherList"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="教师名" align="center" prop="nickName" />
       <el-table-column label="指导学生数" align="center" prop="quantity" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="教师id" align="center" prop="id" />
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+      >
         <template slot-scope="scope">
           <el-button
-            size="mini"
             type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['graduation:teacher:edit']"
-          >修改</el-button>
+            icon="el-icon-plus"
+            size="mini"
+            @click="handleAdd(scope.row)"
+            v-hasPermi="['graduation:student:add']"
+            >选择</el-button
+          >
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['graduation:teacher:remove']"
-          >删除</el-button>
+            v-hasPermi="['graduation:student:remove']"
+            >退选</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -96,10 +131,12 @@
 
     <!-- 添加或修改选择导师任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="指导学生数" prop="quantity">
-          <el-input v-model="form.quantity" placeholder="请输入指导学生数" />
-        </el-form-item>
+      <el-form
+        ref="chooseForm"
+        :model="chooseForm"
+        :rules="rules"
+        label-width="80px"
+      >
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -110,14 +147,17 @@
 </template>
 
 <script>
-import { listTeacher, getTeacher, delTeacher, addTeacher, updateTeacher } from "@/api/graduation/choose";
+import { listTeacher, getTeacher } from "@/api/graduation/choose";
+import { addStudent, delStudent } from "@/api/graduation/student";
+import { getUserProfile } from "@/api/system/user";
 
 export default {
   name: "Teacher",
-  components: {
-  },
+  components: {},
   data() {
     return {
+      // 用户
+      user: {},
       // 遮罩层
       loading: true,
       // 选中数组
@@ -144,22 +184,29 @@ export default {
       },
       // 表单参数
       form: {},
+      // 教师学生关联表表单参数
+      chooseForm: {},
       // 表单校验
-      rules: {
-      }
+      rules: {},
     };
   },
   created() {
     this.getList();
+    this.getUser();
   },
   methods: {
     /** 查询选择导师任务列表 */
     getList() {
       this.loading = true;
-      listTeacher(this.queryParams).then(response => {
+      listTeacher(this.queryParams).then((response) => {
         this.teacherList = response.rows;
-        this.total = response.total;  
+        this.total = response.total;
         this.loading = false;
+      });
+    },
+    getUser() {
+      getUserProfile().then((response) => {
+        this.user = response.data;
       });
     },
     // 取消按钮
@@ -175,10 +222,21 @@ export default {
         title: null,
         quantity: null,
         description: null,
-        updateTime: null
+        updateTime: null,
       };
       this.resetForm("form");
     },
+
+    // 教师学生关联表表单重置
+    chooseReset() {
+      this.chooseForm = {
+        id: null,
+        teacherId: null,
+        studentId: null,
+      };
+      this.resetForm("chooseForm");
+    },
+
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
@@ -191,21 +249,30 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map((item) => item.id);
+      this.single = selection.length !== 1;
+      this.multiple = !selection.length;
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加选择导师任务";
+    /** 选择按钮操作 */
+    handleAdd(row) {
+      this.chooseReset();
+      const id = row.id || this.ids;
+      getTeacher(id).then((response) => {
+        this.form = response.data;
+        this.chooseForm = {
+          id: null,
+          teacherId: this.form.id,
+          studentId: this.user.userId,
+        };
+        this.open = true;
+        this.title = "确定选择这个老师吗？";
+      });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids
-      getTeacher(id).then(response => {
+      const id = row.id || this.ids;
+      getTeacher(id).then((response) => {
         this.form = response.data;
         this.open = true;
         this.title = "修改选择导师任务";
@@ -213,44 +280,65 @@ export default {
     },
     /** 提交按钮 */
     submitForm() {
-      this.$refs["form"].validate(valid => {
+      this.$refs["chooseForm"].validate((valid) => {
         if (valid) {
-          if (this.form.id != null) {
-            updateTeacher(this.form).then(response => {
-              this.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addTeacher(this.form).then(response => {
-              this.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+          addStudent(this.chooseForm).then((response) => {
+            this.msgSuccess("新增成功");
+            this.open = false;
+            this.getList();
+          });
         }
       });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$confirm('是否确认删除选择导师任务编号为"' + ids + '"的数据项?', "警告", {
+      const ids = row.id;
+      this.$confirm(
+        '是否确认删除教师学生关联编号为"' + ids + '"的数据项?',
+        "警告",
+        {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
-          return delTeacher(ids);
-        }).then(() => {
+          type: "warning",
+        }
+      )
+        .then(function () {
+          return delStudent(ids);
+        })
+        .then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
+        });
     },
+    // handleDelete(row) {
+    //   const ids = row.id || this.ids;
+    //   this.$confirm(
+    //     '是否确认删除选择导师任务编号为"' + ids + '"的数据项?',
+    //     "警告",
+    //     {
+    //       confirmButtonText: "确定",
+    //       cancelButtonText: "取消",
+    //       type: "warning",
+    //     }
+    //   )
+    //     .then(function () {
+    //       return delTeacher(ids);
+    //     })
+    //     .then(() => {
+    //       this.getList();
+    //       this.msgSuccess("删除成功");
+    //     });
+    // },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('graduation/teacher/export', {
-        ...this.queryParams
-      }, `graduation_teacher.xlsx`)
-    }
-  }
+      this.download(
+        "graduation/teacher/export",
+        {
+          ...this.queryParams,
+        },
+        `graduation_teacher.xlsx`
+      );
+    },
+  },
 };
 </script>
