@@ -118,6 +118,11 @@ export const constantRoutes = [
         meta: { title: '修改生成配置' }
       }
     ]
+  },
+  {
+    path: '/task',
+    component: Layout,
+    hidden: true,
   }
 ]
 
