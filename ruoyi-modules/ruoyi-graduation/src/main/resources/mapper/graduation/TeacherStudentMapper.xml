@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.graduation.mapper.TeacherStudentMapper">
+    
+    <resultMap type="TeacherStudent" id="TeacherStudentResult">
+        <result property="id"    column="id"    />
+        <result property="teacherId"    column="teacher_id"    />
+        <result property="studentId"    column="student_id"    />
+    </resultMap>
+
+    <sql id="selectTeacherStudentVo">
+        select id, teacher_id, student_id from teacher_student
+    </sql>
+
+    <select id="selectTeacherStudentList" parameterType="TeacherStudent" resultMap="TeacherStudentResult">
+        <include refid="selectTeacherStudentVo"/>
+        <where>  
+            <if test="teacherId != null "> and teacher_id = #{teacherId}</if>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+        </where>
+    </select>
+    
+    <select id="selectTeacherStudentById" parameterType="Long" resultMap="TeacherStudentResult">
+        <include refid="selectTeacherStudentVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTeacherStudent" parameterType="TeacherStudent" useGeneratedKeys="true" keyProperty="id">
+        insert into teacher_student
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teacherId != null">teacher_id,</if>
+            <if test="studentId != null">student_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teacherId != null">#{teacherId},</if>
+            <if test="studentId != null">#{studentId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTeacherStudent" parameterType="TeacherStudent">
+        update teacher_student
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teacherId != null">teacher_id = #{teacherId},</if>
+            <if test="studentId != null">student_id = #{studentId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTeacherStudentById" parameterType="Long">
+        delete from teacher_student where id = #{id}
+    </delete>
+
+    <delete id="deleteTeacherStudentByIds" parameterType="String">
+        delete from teacher_student where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
