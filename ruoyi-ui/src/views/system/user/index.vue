@@ -121,9 +121,19 @@
               plain
               icon="el-icon-upload2"
               size="mini"
-              @click="handleImport"
+              @click="handleImportTeacher"
               v-hasPermi="['system:user:import']"
-            >导入</el-button>
+            >导入教师</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="info"
+              plain
+              icon="el-icon-upload2"
+              size="mini"
+              @click="handleImportStudent"
+              v-hasPermi="['system:user:import']"
+            >导入学生</el-button>
           </el-col>
           <el-col :span="1.5">
             <el-button
@@ -330,7 +340,9 @@
         </div>
         <div class="el-upload__tip" slot="tip">
           <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的用户数据
-          <el-link type="info" style="font-size:12px" @click="importTemplate">下载模板</el-link>
+          <el-link type="info" style="font-size:12px" v-if="flag==1" @click="importTemplateTeacher">下载模板</el-link>
+          <el-link type="info" style="font-size:12px" v-if="flag==2" @click="importTemplateStudent">下载模板</el-link>
+
         </div>
         <div class="el-upload__tip" style="color:red" slot="tip">提示：仅允许导入“xls”或“xlsx”格式文件！</div>
       </el-upload>
@@ -354,6 +366,10 @@ export default {
   components: { Treeselect },
   data() {
     return {
+      // 1 导入教师，2 导入学生
+      flag: 0,
+      // 上传路径
+      urlB: "",
       // 遮罩层
       loading: true,
       // 选中数组
@@ -407,7 +423,7 @@ export default {
         // 设置上传的请求头部
         headers: { Authorization: "Bearer " + getToken() },
         // 上传的地址
-        url: process.env.VUE_APP_BASE_API + "/system/user/importData"
+        url: process.env.VUE_APP_BASE_API + this.urlB
       },
       // 查询参数
       queryParams: {
@@ -637,15 +653,30 @@ export default {
       }, `user_${new Date().getTime()}.xlsx`)
     },
     /** 导入按钮操作 */
-    handleImport() {
-      this.upload.title = "用户导入";
+    handleImportTeacher() {
+      this.flag = 1,
+      this.urlB = "/system/user/importDataTeacher";
+      this.upload.url = process.env.VUE_APP_BASE_API + this.urlB;
+      this.upload.title = "教师导入";
+      this.upload.open = true;
+    },
+    handleImportStudent() {
+      this.flag = 2,
+      this.urlB = "/system/user/importDataStudent";
+      this.upload.url = process.env.VUE_APP_BASE_API + this.urlB;
+      this.upload.title = "学生导入";
       this.upload.open = true;
     },
     /** 下载模板操作 */
-    importTemplate() {
-      this.download('system/user/importTemplate', {
-        ...this.queryParams
-      }, `user_${new Date().getTime()}.xlsx`)
+    importTemplateTeacher() {
+      this.download('system/user/importTemplateTeacher', {
+        ...this.queryParams 
+      }, `teacher_${new Date().getTime()}.xlsx`)
+    },
+    importTemplateStudent() {
+      this.download('system/user/importTemplateStudent', {
+        ...this.queryParams 
+      }, `student_${new Date().getTime()}.xlsx`)
     },
     // 文件上传中处理
     handleFileUploadProgress(event, file, fileList) {
