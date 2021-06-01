@@ -671,7 +671,12 @@ export default {
     importTemplateTeacher() {
       this.download('system/user/importTemplateTeacher', {
         ...this.queryParams 
-      }, `user_${new Date().getTime()}.xlsx`)
+      }, `teacher_${new Date().getTime()}.xlsx`)
+    },
+    importTemplateStudent() {
+      this.download('system/user/importTemplateStudent', {
+        ...this.queryParams 
+      }, `student_${new Date().getTime()}.xlsx`)
     },
     // 文件上传中处理
     handleFileUploadProgress(event, file, fileList) {
