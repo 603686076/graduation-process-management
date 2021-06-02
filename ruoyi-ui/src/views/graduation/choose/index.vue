@@ -266,7 +266,7 @@ export default {
           id: null,
           teacherId: this.form.id,
           studentId: this.user.userId,
-        };
+        };  
         this.open = true;
         this.title = "确定选择这个老师吗？";
       });

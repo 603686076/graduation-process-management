@@ -37,7 +37,8 @@ public class SysFileController
             SysFile sysFile = new SysFile();
             sysFile.setName(FileUtils.getName(url));
             sysFile.setUrl(url);
-            return R.ok(sysFile);
+            String msg = "文件上传成功";
+            return R.ok(sysFile, msg);
         }
         catch (Exception e)
         {

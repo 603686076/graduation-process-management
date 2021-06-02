@@ -75,6 +75,7 @@ public class FileUploadUtils
 
         String fileName = extractFilename(file);
 
+        // 获取绝对路径
         File desc = getAbsoluteFile(baseDir, fileName);
         file.transferTo(desc);
         String pathFileName = getPathFileName(fileName);
@@ -87,8 +88,9 @@ public class FileUploadUtils
     public static final String extractFilename(MultipartFile file)
     {
         String fileName = file.getOriginalFilename();
-        String extension = getExtension(file);
-        fileName = DateUtils.datePath() + "/" + IdUtils.fastUUID() + "." + extension;
+//        String extension = getExtension(file);
+//        fileName = DateUtils.datePath() + "/" + IdUtils.fastUUID() + "." + extension;
+        fileName = DateUtils.datePath() + "/" + fileName;
         return fileName;
     }
 
