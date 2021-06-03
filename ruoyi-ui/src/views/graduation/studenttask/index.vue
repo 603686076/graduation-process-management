@@ -188,7 +188,7 @@
       <el-upload
         ref="upload"
         :limit="1"
-        accept=".jpg, .png"
+        accept=".docx, .doc"
         :action="upload.url"
         :headers="upload.headers"
         :on-progress="handleFileUploadProgress"
