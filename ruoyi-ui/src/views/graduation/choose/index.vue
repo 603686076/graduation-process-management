@@ -113,8 +113,8 @@
             size="mini"
             type="text"
             icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['graduation:student:remove']"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['graduation:student:edit']"
             >退选</el-button
           >
         </template>
@@ -148,7 +148,7 @@
 
 <script>
 import { listTeacher, getTeacher } from "@/api/graduation/choose";
-import { addStudent, delStudent } from "@/api/graduation/student";
+import { addStudent, delStudent, updateStudent } from "@/api/graduation/student";
 import { getUserProfile } from "@/api/system/user";
 
 export default {
@@ -156,6 +156,8 @@ export default {
   components: {},
   data() {
     return {
+      // 1选择导师，2退选导师
+      flag: 0,
       // 用户
       user: {},
       // 遮罩层
@@ -255,6 +257,30 @@ export default {
     },
     /** 选择按钮操作 */
     handleAdd(row) {
+      this.flag = 1;
+      this.chooseReset();
+      const id = row.id || this.ids;
+      getTeacher(id).then((response) => {
+        this.form = response.data;
+        this.chooseForm = {
+          id: null,
+          teacherId: this.form.id,
+          studentId: this.user.userId,
+        };  
+        this.open = true;
+        this.title = "确定选择这个老师吗？";
+      });
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      // this.reset();
+      // const id = row.id || this.ids;
+      // getTeacher(id).then((response) => {
+      //   this.form = response.data;
+      //   this.open = true;
+      //   this.title = "修改选择导师任务";
+      // });
+      this.flag = 2;
       this.chooseReset();
       const id = row.id || this.ids;
       getTeacher(id).then((response) => {
@@ -265,28 +291,26 @@ export default {
           studentId: this.user.userId,
         };
         this.open = true;
-        this.title = "确定选择这个老师吗？";
-      });
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids;
-      getTeacher(id).then((response) => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改选择导师任务";
+        this.title = "确定取消选择这个老师吗？";
       });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["chooseForm"].validate((valid) => {
         if (valid) {
-          addStudent(this.chooseForm).then((response) => {
-            this.msgSuccess("新增成功");
-            this.open = false;
-            this.getList();
-          });
+          if (this.flag == 2) {
+            updateStudent(this.chooseForm).then((response => {
+              this.msgSuccess("取消选择导师成功");
+              this.open = false;
+              this.getList();
+            }))
+          } else {
+            addStudent(this.chooseForm).then((response) => {
+              this.msgSuccess("选择导师成功");
+              this.open = false;
+              this.getList();
+            });
+          }
         }
       });
     },

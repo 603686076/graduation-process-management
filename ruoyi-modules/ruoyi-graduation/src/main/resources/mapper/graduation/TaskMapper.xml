@@ -107,4 +107,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+
+    <select id="selectStudentTaskList" resultMap="TaskResult">
+        # 查询所有完成角色为学生的任务，即 target = '1'
+        select * from task where target = '1'
+    </select>
+
 </mapper>

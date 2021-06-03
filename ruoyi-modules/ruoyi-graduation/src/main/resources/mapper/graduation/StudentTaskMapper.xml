@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.graduation.mapper.StudentTaskMapper">
+    
+    <resultMap type="StudentTask" id="StudentTaskResult">
+        <result property="id"    column="id"    />
+        <result property="taskId"    column="task_id"    />
+        <result property="description"    column="description"    />
+        <result property="filename"    column="filename"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="studentId"    column="student_id"    />
+    </resultMap>
+
+    <sql id="selectStudentTaskVo">
+        select id, task_id, description, filename, update_time, student_id from student_task
+    </sql>
+
+    <select id="selectStudentTaskList" parameterType="StudentTask" resultMap="StudentTaskResult">
+        <include refid="selectStudentTaskVo"/>
+        <where>  
+            <if test="taskId != null "> and task_id = #{taskId}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="filename != null  and filename != ''"> and filename like concat('%', #{filename}, '%')</if>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+        </where>
+    </select>
+    
+    <select id="selectStudentTaskById" parameterType="Long" resultMap="StudentTaskResult">
+        <include refid="selectStudentTaskVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertStudentTask" parameterType="StudentTask">
+        insert into student_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="taskId != null">task_id,</if>
+            <if test="description != null">description,</if>
+            <if test="filename != null">filename,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="studentId != null">student_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="taskId != null">#{taskId},</if>
+            <if test="description != null">#{description},</if>
+            <if test="filename != null">#{filename},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="studentId != null">#{studentId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateStudentTask" parameterType="StudentTask">
+        update student_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="filename != null">filename = #{filename},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="studentId != null">student_id = #{studentId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteStudentTaskById" parameterType="Long">
+        delete from student_task where id = #{id}
+    </delete>
+
+    <delete id="deleteStudentTaskByIds" parameterType="String">
+        delete from student_task where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

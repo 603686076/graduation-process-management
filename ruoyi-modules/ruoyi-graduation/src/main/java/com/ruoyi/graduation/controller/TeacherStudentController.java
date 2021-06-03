@@ -112,13 +112,30 @@ public class TeacherStudentController extends BaseController
 
     /**
      * 修改教师学生关联
+     * 退选事务（teacher_student表减少一条记录，student表teacher_id修改为0，对应教师的teacher表quantity+1。）
      */
     @PreAuthorize(hasPermi = "graduation:student:edit")
     @Log(title = "教师学生关联", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TeacherStudent teacherStudent)
     {
-        return toAjax(teacherStudentService.updateTeacherStudent(teacherStudent));
+        // student表teacher_id修改为0
+        Student student = new Student();
+        student.setId(teacherStudent.getStudentId());
+        student.setTeacherId(0L);
+        studentService.updateStudent(student);
+
+        // 对应教师的teacher表quantity+1
+        Teacher teacher = new Teacher();
+        Long teacherId = teacherStudent.getTeacherId();
+        Long quantity = teacherService.selectTeacherById(teacherId).getQuantity();
+        ++quantity;
+        teacher.setId(teacherId);
+        teacher.setQuantity(quantity);
+        teacherService.updateTeacher(teacher);
+
+        // teacher_student表减少一条记录
+        return toAjax(teacherStudentService.deleteTeacherStudentById(teacherStudent.getStudentId()));
     }
 
     /**

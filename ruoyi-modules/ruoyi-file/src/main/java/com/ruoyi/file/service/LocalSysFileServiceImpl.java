@@ -37,7 +37,7 @@ public class LocalSysFileServiceImpl implements ISysFileService
      * 本地文件上传接口
      * 
      * @param file 上传的文件
-     * @return 访问地址
+     * @return 访问地址（对文件地址进行了映射（将物理路径名映射为访问地址名）
      * @throws Exception
      */
     @Override

@@ -92,4 +92,9 @@ public class TaskServiceImpl implements ITaskService
     {
         return taskMapper.deleteTaskById(id);
     }
+
+    @Override
+    public List<Task> selectStudentTaskList() {
+        return taskMapper.selectStudentTaskList();
+    }
 }
