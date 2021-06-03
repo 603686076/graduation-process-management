@@ -98,11 +98,11 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="学生任务ID" align="center" prop="id" />
-      <el-table-column label="任务ID" align="center" prop="taskId" />
+      <!-- <el-table-column label="学生任务ID" align="center" prop="id" /> -->
+      <!-- <el-table-column label="任务ID" align="center" prop="taskId" /> -->
       <el-table-column label="任务描述" align="center" prop="description" />
       <el-table-column label="文件名称" align="center" prop="filename" />
-      <el-table-column label="学生ID" align="center" prop="studentId" />
+      <!-- <el-table-column label="学生ID" align="center" prop="studentId" /> -->
       <el-table-column
         label="操作"
         align="center"
@@ -221,6 +221,8 @@
         </div>
       </el-upload>
     </el-dialog>
+
+   
   </div>
 </template>
 
@@ -245,6 +247,10 @@ export default {
   components: {},
   data() {
     return {
+      // 查询出来的建议
+      suggestList: [],
+      // 教师建议表单参数（通过将学生任务id封装成suggestionForm表，去后台调用/list查询出整个建议的信息）
+      suggestionForm: {},
       // 下载时通过包装文件名去后台查找返回的数据
       studentfileinfoList: [],
       // 没用了
@@ -338,6 +344,11 @@ export default {
       this.open = false;
       this.reset();
     },
+    // 取消按钮，关闭添加或修改教师意见对话框
+    cancelSuggestionOpen() {
+      this.suggestionOpen = false;
+      this.suggestionFormReset();
+    },
     // 表单重置
     reset() {
       this.form = {
@@ -374,6 +385,18 @@ export default {
       this.ids = selection.map((item) => item.id);
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
+    },
+    // 建议表单重置
+    suggestionFormReset() {
+      this.suggestionForm = {
+        id: null,
+        teacherId: null,
+        studentId: null,
+        taskId: null,
+        suggestion: null,
+        updateTime: null,
+      };
+      this.resetForm("suggestionForm");
     },
     /** 新增按钮操作 */
     handleAdd() {
@@ -573,7 +596,7 @@ export default {
           a.click();
         } else {
           this.$message.error("文件不存在");
-        } 
+        }
       });
       // console.log(this.fileForm);
     },

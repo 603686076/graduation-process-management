@@ -15,7 +15,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="任务描述" prop="description">
         <el-input
           v-model="queryParams.description"
@@ -24,7 +24,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item> -->
+      </el-form-item>
       <el-form-item label="文件名称" prop="filename">
         <el-input
           v-model="queryParams.filename"
@@ -102,15 +102,16 @@
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row> -->
+
     <el-table
       v-loading="loading"
       :data="studenttaskList"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="学生任务ID" align="center" prop="id" />
+      <!-- <el-table-column label="学生任务ID" align="center" prop="id" /> -->
       <!-- <el-table-column label="任务ID" align="center" prop="taskId" /> -->
-      <!-- <el-table-column label="任务描述" align="center" prop="description" /> -->
+      <el-table-column label="任务描述" align="center" prop="description" />
       <el-table-column label="文件名称" align="center" prop="filename" />
       <!-- <el-table-column label="学生ID" align="center" prop="studentId" /> -->
       <el-table-column
@@ -136,18 +137,8 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-download"
-            @click="handleDownload(scope.row)"
-            v-hasPermi="['graduation:studentfile:download']"
-            >下载文件</el-button
-          >
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleSuggestionUpdate(scope.row)"
-            v-hasPermi="['graduation:suggestion:write']"
-            >填写建议</el-button
+            @click="handleViewAdvice(scope.row)"
+            >查看教师建议</el-button
           >
         </template>
       </el-table-column>
@@ -183,7 +174,7 @@
       </div>
     </el-dialog>
 
-    <!-- 添加或修改教师意见对话框 -->
+    <!-- 查看教师意见对话框 -->
     <el-dialog
       :title="title"
       :visible.sync="suggestionOpen"
@@ -197,18 +188,15 @@
         label-width="80px"
       >
         <el-form-item label="建议" prop="suggestion">
-          <el-input
-            v-model="suggestionForm.suggestion"
-            placeholder="请输入建议"
-          />
+          <el-input :disabled="true" v-model="suggestionForm.suggestion" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <!-- <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitSuggestionForm"
           >确 定</el-button
         >
         <el-button @click="cancelSuggestionOpen">取 消</el-button>
-      </div>
+      </div> -->
     </el-dialog>
   </div>
 </template>
@@ -220,33 +208,22 @@ import {
   delStudenttask,
   addStudenttask,
   updateStudenttask,
-} from "@/api/graduation/studentpapers";
-
-import { listStudentfileinfo } from "@/api/graduation/studentfileinfo";
-
-import {
-  listSuggestion,
-  addSuggestion,
-  updateSuggestion,
-} from "@/api/graduation/suggestion";
-
-import { getUserProfile } from "@/api/system/user";
+} from "@/api/graduation/studenttask";
+import { listStudenttaskView } from "@/api/graduation/viewsuggestions";
+import { listSuggestion } from "@/api/graduation/suggestion";
 
 export default {
   name: "Studenttask",
   components: {},
   data() {
     return {
-      // 是否显示添加或修改教师意见对话框
+      // 是否显示查看教师建议会话框
       suggestionOpen: false,
       // 查询出来的建议
       suggestList: [],
       // 教师建议表单参数（通过将学生任务id封装成suggestionForm表，去后台调用/list查询出整个建议的信息）
       suggestionForm: {},
-      // 文件表单参数（通过将文件名封装成fileForm表，去后台调用/list查询出整个文件的信息）
-      fileForm: {},
-      // 用户
-      user: {},
+      // 下载时通过包装文件名去后台查找返回的数据
       // 遮罩层
       loading: true,
       // 选中数组
@@ -289,18 +266,12 @@ export default {
   },
   created() {
     this.getList();
-    this.getUser();
   },
   methods: {
-    getUser() {
-      getUserProfile().then((response) => {
-        this.user = response.data;
-      });
-    },
     /** 查询所有任务列表 */
     getList() {
       this.loading = true;
-      listStudenttask(this.queryParams).then((response) => {
+      listStudenttaskView(this.queryParams).then((response) => {
         this.studenttaskList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -310,11 +281,6 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
-    },
-    // 取消按钮，关闭添加或修改教师意见对话框
-    cancelSuggestionOpen() {
-      this.suggestionOpen = false;
-      this.suggestionFormReset();
     },
     // 表单重置
     reset() {
@@ -344,37 +310,6 @@ export default {
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
-    // 文件表单重置
-    fileFormReset() {
-      this.fileForm = {
-        fileId: null,
-        fileName: null,
-        filePath: null,
-      };
-      this.resetForm("fileForm");
-    },
-    /** 下载文件按钮操作 */
-    handleDownload(row) {
-      this.fileFormReset();
-      this.fileForm.fileName = row.filename;
-      // 调用下载操作(先查询出来文件信息，找到url跳转下载)
-      listStudentfileinfo(this.fileForm).then((response) => {
-        this.studentfileinfoList = response.rows;
-        if (this.studentfileinfoList.length != 0) {
-          // 文件绝不可能重名，查询结果也只有一个，取出来
-          var url = this.studentfileinfoList[0].filePath;
-          var name = this.fileForm.fileName;
-          var suffix = url.substring(url.lastIndexOf("."), url.length);
-          const a = document.createElement("a");
-          a.setAttribute("download", name + suffix);
-          a.setAttribute("target", "_blank");
-          a.setAttribute("href", url);
-          a.click();
-        } else {
-          this.$message.error("文件不存在");
-        }
-      });
-    },
     // 建议表单重置
     suggestionFormReset() {
       this.suggestionForm = {
@@ -385,47 +320,21 @@ export default {
         suggestion: null,
         updateTime: null,
       };
-      this.resetForm("suggestionForm");
     },
-    /** 填写建议按钮操作 */
-    handleSuggestionUpdate(row) {
-      console.log(row);
+    /** 查看教师建议按钮 */
+    handleViewAdvice(row) {
       this.suggestionFormReset();
       this.suggestionForm.taskId = row.id;
       listSuggestion(this.suggestionForm).then((response) => {
         this.suggestList = response.rows;
-        // 如果不存在，新建建议
+        // 如果不存在，返回还没有建议
         if (this.suggestList.length == 0) {
-          // 将数据封装，准备新增
-          this.suggestionForm.studentId = row.studentId;
-          this.suggestionForm.teacherId = this.user.userId;
-          this.suggestionOpen = true;
-          this.title = "新增建议";
+          this.msgInfo("还没有建议呢");
         } else {
-          // 如果存在，编辑建议
+          // 如果存在，查看建议
           this.suggestionForm = this.suggestList[0];
           this.suggestionOpen = true;
-          this.title = "编辑建议";
-        }
-      });
-    },
-    submitSuggestionForm() {
-      this.$refs["suggestionForm"].validate((valid) => {
-        if (valid) {
-          if (this.suggestionForm.id == null) {
-            addSuggestion(this.suggestionForm).then((response) => {
-              this.msgSuccess("新增建议成功");
-              this.suggestionOpen = false;
-              this.getList();
-            });
-          } else {
-            updateSuggestion(this.suggestionForm).then((response) => {
-              this.msgSuccess("修改建议成功");
-              this.suggestionOpen = false;
-              this.suggestList = response.rows;
-              this.getList();
-            });
-          }
+          this.title = "查看建议";
         }
       });
     },
