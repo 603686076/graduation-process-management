@@ -2,6 +2,7 @@
   <div class="app-container">
     <div>{{ fileForm.fileName }}</div>
     <div>{{ fileForm.filePath }}</div>
+    <div>{{ resultFileName }}</div>
     <!-- <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="任务ID" prop="taskId">
         <el-input
@@ -193,6 +194,8 @@
         :on-progress="handleFileUploadProgress"
         :on-success="handleFileSuccess"
         :auto-upload="false"
+        :file-list="upload.fileList"
+        :before-upload="handleFileBeforeUpload"
       >
         <el-button slot="trigger" size="small" type="primary"
           >选取文件</el-button
@@ -231,7 +234,10 @@ import {
   getStudentfileinfoByFileName,
 } from "@/api/graduation/studenttask";
 import { getToken } from "@/utils/auth";
-import { addStudentfileinfo } from "@/api/graduation/studentfileinfo";
+import {
+  addStudentfileinfo,
+  listStudentfileinfo,
+} from "@/api/graduation/studentfileinfo";
 import { getUserProfile } from "@/api/system/user";
 
 export default {
@@ -239,6 +245,12 @@ export default {
   components: {},
   data() {
     return {
+      // 下载时通过包装文件名去后台查找返回的数据
+      studentfileinfoList: [],
+      // 没用了
+      copyFile: null,
+      // 拼接后的文件名
+      resultFileName: "",
       // 用户
       user: {},
       // 1上传文件，2修改文件
@@ -284,6 +296,8 @@ export default {
         headers: { Authorization: "Bearer " + getToken() },
         // 上传的地址
         url: process.env.VUE_APP_BASE_API + "/file/upload",
+        // 上传的文件列表
+        fileList: [],
       },
       // 文件表单参数
       fileForm: {},
@@ -377,7 +391,23 @@ export default {
       this.form.taskId = row.taskId;
       this.form.description = row.description;
       this.form.studentId = this.user.userId;
-      console.log(this.form);
+
+      // 通过前端传入行数据获取fileName
+      var list = row.filename.split(",");
+      var result = "";
+      list.forEach((item, index, array) => {
+        if (item.charAt(0) == "@") {
+          if (item == "@学生姓名") {
+            result += this.user.nickName + "-";
+          }
+          if (item == "@学号") {
+            result += this.user.userName + "-";
+          }
+        } else {
+          index == array.length - 1 ? (result += item) : (result += item + "-");
+        }
+      });
+      this.resultFileName = result;
     },
     handleUpdateFile() {
       this.flag = 2;
@@ -424,7 +454,9 @@ export default {
       // 当文件已经上传到服务器后才能提交
       if (this.fileForm.fileName != null && this.fileForm.filePath != null) {
         if (this.flag == 1) {
-          this.form.filename = this.fileForm.fileName;
+          this.form.filename = this.resultFileName;
+          this.fileForm.fileName = this.resultFileName;
+          // this.form.filename = this.fileForm.fileName;
           // 向student_task插入新数据
           addStudenttask(this.form).then((response) => {
             this.msgSuccess("数据库表student_task新增成功");
@@ -473,12 +505,26 @@ export default {
         `graduation_studenttask.xlsx`
       );
     },
+    // 文件上传前处理
+    handleFileBeforeUpload(file) {
+      // Cannot assign to read only property 'name'
+      // file.name = this.resultFileName;
+      // console.log(file);
+      // this.copyFile = new File([file], this.resultFileName);
+    },
     // 文件提交处理
     submitUpload() {
+      // this.upload.fileList = [{ name: this.resultFileName, url: this.upload.fileList[0].url }];
+      // console.log(this.upload.fileList);
+      // this.upload.fileList = [{name: this.resultFileName, url: 'D:/ruoyi/uploadPath/2021/06/02/上传文件测试.png'}];
       this.$refs.upload.submit();
     },
     // 文件上传中处理
     handleFileUploadProgress(event, file, fileList) {
+      // file.name = this.resultFileName;
+      // console.log("文件上传中处理");
+      // console.log(file);
+      // console.log(fileList);
       this.upload.isUploading = true;
     },
     // 文件上传成功处理
@@ -488,17 +534,48 @@ export default {
       this.fileForm.fileName = response.data.name;
       this.fileForm.filePath = response.data.url;
       this.msgSuccess(response.msg);
+      // console.log("文件上传成功处理");
+      // console.log(file);
+      // console.log(fileList);
     },
     // 文件下载处理
     handleDownload(row) {
-      var name = row.fileName;
-      var url = row.filePath;
-      var suffix = url.substring(url.lastIndexOf("."), url.length);
-      const a = document.createElement("a");
-      a.setAttribute("download", name + suffix);
-      a.setAttribute("target", "_blank");
-      a.setAttribute("href", url);
-      a.click();
+      // 通过前端传入行数据获取fileName
+      var list = row.filename.split(",");
+      var result = "";
+      list.forEach((item, index, array) => {
+        if (item.charAt(0) == "@") {
+          if (item == "@学生姓名") {
+            result += this.user.nickName + "-";
+          }
+          if (item == "@学号") {
+            result += this.user.userName + "-";
+          }
+        } else {
+          index == array.length - 1 ? (result += item) : (result += item + "-");
+        }
+      });
+      console.log(result);
+
+      this.fileFormReset();
+      this.fileForm.fileName = result;
+      // console.log(this.fileForm);
+      listStudentfileinfo(this.fileForm).then((response) => {
+        this.studentfileinfoList = response.rows;
+        if (this.studentfileinfoList.length != 0) {
+          var url = this.studentfileinfoList[0].filePath;
+          var name = this.fileForm.fileName;
+          var suffix = url.substring(url.lastIndexOf("."), url.length);
+          const a = document.createElement("a");
+          a.setAttribute("download", name + suffix);
+          a.setAttribute("target", "_blank");
+          a.setAttribute("href", url);
+          a.click();
+        } else {
+          this.$message.error("文件不存在");
+        } 
+      });
+      // console.log(this.fileForm);
     },
   },
 };
