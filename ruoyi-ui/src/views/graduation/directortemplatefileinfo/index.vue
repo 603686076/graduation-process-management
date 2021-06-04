@@ -16,7 +16,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="文件路径" prop="filePath">
+      <!-- <el-form-item label="文件路径" prop="filePath">
         <el-input
           v-model="queryParams.filePath"
           placeholder="请输入文件路径"
@@ -24,7 +24,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button
           type="primary"
@@ -98,9 +98,9 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="文件id" align="center" prop="fileId" />
+      <!-- <el-table-column label="文件id" align="center" prop="fileId" /> -->
       <el-table-column label="文件名称" align="center" prop="fileName" />
-      <el-table-column label="文件路径" align="center" prop="filePath" />
+      <!-- <el-table-column label="文件路径" align="center" prop="filePath" /> -->
       <el-table-column
         label="操作"
         align="center"
@@ -317,7 +317,7 @@ export default {
       if (this.form.fileName != null && this.form.filePath != null) {
         // 向template_file_info插入新数据
         addTemplatefileinfo(this.form).then((response) => {
-          this.msgSuccess("数据库表student_task新增成功");
+          this.msgSuccess("上传成功");
           this.upload.open = false;
           this.getList();
         });

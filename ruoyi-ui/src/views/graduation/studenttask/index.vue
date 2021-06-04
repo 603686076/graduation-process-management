@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <div>{{ fileForm.fileName }}</div>
+    <!-- <div>{{ fileForm.fileName }}</div>
     <div>{{ fileForm.filePath }}</div>
-    <div>{{ resultFileName }}</div>
+    <div>{{ resultFileName }}</div> -->
     <!-- <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="任务ID" prop="taskId">
         <el-input
@@ -101,7 +101,7 @@
       <!-- <el-table-column label="学生任务ID" align="center" prop="id" /> -->
       <!-- <el-table-column label="任务ID" align="center" prop="taskId" /> -->
       <el-table-column label="任务描述" align="center" prop="description" />
-      <el-table-column label="文件名称" align="center" prop="filename" />
+      <!-- <el-table-column label="文件名称" align="center" prop="filename" /> -->
       <!-- <el-table-column label="学生ID" align="center" prop="studentId" /> -->
       <el-table-column
         label="操作"
@@ -482,14 +482,15 @@ export default {
           // this.form.filename = this.fileForm.fileName;
           // 向student_task插入新数据
           addStudenttask(this.form).then((response) => {
-            this.msgSuccess("数据库表student_task新增成功");
+            // this.msgSuccess("数据库表student_task新增成功");
             this.upload.open = false;
           });
           // 向student_file_info插入新数据
           addStudentfileinfo(this.fileForm).then((response) => {
-            this.msgSuccess("数据库表student_file_info新增成功");
+            // this.msgSuccess("数据库表student_file_info新增成功");
             this.upload.open = false;
           });
+          this.msgSuccess("提交成功");
         }
       }
       // addStudenttask(this.form).then((response) => {
@@ -595,7 +596,7 @@ export default {
           a.setAttribute("href", url);
           a.click();
         } else {
-          this.$message.error("文件不存在");
+          this.msgInfo("你还没有上传过文件哟~");
         }
       });
       // console.log(this.fileForm);

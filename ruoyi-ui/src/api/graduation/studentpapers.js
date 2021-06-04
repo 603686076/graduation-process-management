@@ -1,5 +1,15 @@
 import request from '@/utils/request'
 
+
+// 查询所有选择过这个老师的任务的文件列表
+export function listChosen(query) {
+  return request({
+    url: '/graduation/studentpapers/listchosen',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询所有任务列表
 export function listStudenttask(query) {
   return request({

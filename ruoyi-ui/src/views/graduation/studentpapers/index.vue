@@ -108,7 +108,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="学生任务ID" align="center" prop="id" />
+      <!-- <el-table-column label="学生任务ID" align="center" prop="id" /> -->
       <!-- <el-table-column label="任务ID" align="center" prop="taskId" /> -->
       <!-- <el-table-column label="任务描述" align="center" prop="description" /> -->
       <el-table-column label="文件名称" align="center" prop="filename" />
@@ -220,6 +220,7 @@ import {
   delStudenttask,
   addStudenttask,
   updateStudenttask,
+  listChosen,
 } from "@/api/graduation/studentpapers";
 
 import { listStudentfileinfo } from "@/api/graduation/studentfileinfo";
@@ -237,6 +238,8 @@ export default {
   components: {},
   data() {
     return {
+      // 查询所有选择过这个老师的任务的文件列表参数
+      queryChosenParams: {},
       // 是否显示添加或修改教师意见对话框
       suggestionOpen: false,
       // 查询出来的建议
@@ -288,19 +291,67 @@ export default {
     };
   },
   created() {
-    this.getList();
     this.getUser();
   },
   methods: {
     getUser() {
       getUserProfile().then((response) => {
+        // 先获取user再刷新列表
         this.user = response.data;
+        this.getList();
+      });
+    },
+    //JS获取交集
+    intersection(arr1, filename) {
+      for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i].fielname != filename) {
+          arr1.splice(i, 1);
+        }
+      }
+    },
+    /** 搜索查询操作 */
+    getQueryList() {
+      this.loading = true;
+
+      var tmpList = [];
+      this.queryChosenParams = {
+        pageNum: 1,
+        pageSize: 10,
+        teacherId: this.user.userId,
+      };
+      listChosen(this.queryChosenParams).then((response) => {
+        tmpList = response.rows;
+        // console.log("tmpList:");
+        // console.log(tmpList);
+        listStudenttask(this.queryParams).then((response) => {
+          this.studenttaskList = response.rows;
+          // console.log("studenttaskList:");
+          // console.log(this.studenttaskList);
+          for (var i = 0; i < tmpList.length; i++) {
+            this.intersection(this.studenttaskList, tmpList[i].filename);
+          }
+          // console.log("studenttaskList后:");
+          // console.log(this.studenttaskList);
+          this.total = this.studenttaskList.length;
+          this.loading = false;
+        });
       });
     },
     /** 查询所有任务列表 */
     getList() {
+      // this.loading = true;
+      // listStudenttask(this.queryParams).then((response) => {
+      //   this.studenttaskList = response.rows;
+      //   this.total = response.total;
+      //   this.loading = false;
+      // });
       this.loading = true;
-      listStudenttask(this.queryParams).then((response) => {
+      this.queryChosenParams = {
+        pageNum: 1,
+        pageSize: 10,
+        teacherId: this.user.userId,
+      };
+      listChosen(this.queryChosenParams).then((response) => {
         this.studenttaskList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -331,7 +382,7 @@ export default {
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
-      this.getList();
+      this.getQueryList();
     },
     /** 重置按钮操作 */
     resetQuery() {

@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form
+    <!-- <el-form
       :model="queryParams"
       ref="queryForm"
       :inline="true"
       v-show="showSearch"
       label-width="68px"
-    >
+    > -->
       <!-- <el-form-item label="任务ID" prop="taskId">
         <el-input
           v-model="queryParams.taskId"
@@ -16,7 +16,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item> -->
-      <el-form-item label="任务描述" prop="description">
+      <!-- <el-form-item label="任务描述" prop="description">
         <el-input
           v-model="queryParams.description"
           placeholder="请输入任务描述"
@@ -33,7 +33,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <!-- <el-form-item label="学生ID" prop="studentId">
         <el-input
           v-model="queryParams.studentId"
@@ -43,7 +43,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item> -->
-      <el-form-item>
+      <!-- <el-form-item>
         <el-button
           type="primary"
           icon="el-icon-search"
@@ -55,7 +55,7 @@
           >重置</el-button
         >
       </el-form-item>
-    </el-form>
+    </el-form> -->
 
     <!-- <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
@@ -211,12 +211,15 @@ import {
 } from "@/api/graduation/studenttask";
 import { listStudenttaskView } from "@/api/graduation/viewsuggestions";
 import { listSuggestion } from "@/api/graduation/suggestion";
+import { getUserProfile } from "@/api/system/user";
 
 export default {
   name: "Studenttask",
   components: {},
   data() {
     return {
+      // 用户
+      user: {},
       // 是否显示查看教师建议会话框
       suggestionOpen: false,
       // 查询出来的建议
@@ -265,12 +268,19 @@ export default {
     };
   },
   created() {
-    this.getList();
+    this.getUser();
   },
   methods: {
+    getUser() {
+      getUserProfile().then((response) => {
+        this.user = response.data;
+        this.getList();
+      });
+    },
     /** 查询所有任务列表 */
     getList() {
       this.loading = true;
+      this.queryParams.studentId = this.user.userId;
       listStudenttaskView(this.queryParams).then((response) => {
         this.studenttaskList = response.rows;
         this.total = response.total;
