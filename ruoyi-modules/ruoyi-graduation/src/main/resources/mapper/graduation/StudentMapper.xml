@@ -14,7 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectStudentVo">
-        select id, clazz, teacher_id, group, topic, update_time from student
+        select id, clazz, teacher_id, `group`, topic, update_time from student
     </sql>
 
     <select id="selectStudentList" parameterType="Student" resultMap="StudentResult">

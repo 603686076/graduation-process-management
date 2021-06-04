@@ -1,6 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form
+      :model="queryParams"
+      ref="queryForm"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
+    >
       <el-form-item label="教师名" prop="nickName">
         <el-input
           v-model="queryParams.nickName"
@@ -11,9 +17,18 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-search"
+          size="mini"
+          @click="handleQuery"
+          >搜索</el-button
+        >
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
+          >重置</el-button
+        >
       </el-form-item>
+      <div style="color: red;">待分配学生数: {{ studentTotal }}</div>
     </el-form>
 
     <!-- <el-row :gutter="10" class="mb8">
@@ -62,11 +77,19 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row> -->
 
-    <el-table v-loading="loading" :data="teacherList" @selection-change="handleSelectionChange">
+    <el-table
+      v-loading="loading"
+      :data="teacherList"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="教师名" align="center" prop="nickName" />
       <el-table-column label="指导学生数" align="center" prop="quantity" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+      >
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -74,7 +97,8 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['graduation:teacher:edit']"
-          >修改</el-button>
+            >修改</el-button
+          >
           <!-- <el-button
             size="mini"
             type="text"
@@ -85,9 +109,9 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -96,6 +120,8 @@
 
     <!-- 添加或修改选择导师任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <div style="color: red;">当前可输入学生最大数: {{ tmpStudentTotal }}</div>
+      
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="指导学生数" prop="quantity">
           <el-input v-model="form.quantity" placeholder="请输入指导学生数" />
@@ -110,14 +136,24 @@
 </template>
 
 <script>
-import { listTeacher, getTeacher, delTeacher, addTeacher, updateTeacher } from "@/api/graduation/teacher";
+import {
+  listTeacher,
+  getTeacher,
+  delTeacher,
+  addTeacher,
+  updateTeacher,
+  listStudnet,
+} from "@/api/graduation/teacher";
 
 export default {
   name: "Teacher",
-  components: {
-  },
+  components: {},
   data() {
     return {
+      //
+      tmpStudentTotal: 0,
+      // 为所有老师分配的指导学生数之和
+      sum: 0,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -142,24 +178,46 @@ export default {
         pageSize: 10,
         nickName: null,
       },
+      studentTotal: null,
       // 表单参数
       form: {},
       // 表单校验
-      rules: {
-      }
+      rules: {},
     };
   },
   created() {
-    this.getList();
+    this.getStudentList();
   },
   methods: {
+    /** 查询学生列表 */
+    getStudentList() {
+      var queryStudnetParams = {
+        pageNum: 1,
+        pageSize: 10,
+        clazz: null,
+        teacherId: null,
+        group: null,
+        topic: null,
+      };
+      listStudnet(queryStudnetParams).then((response) => {
+        // var studentList = [],
+        //   studentList = response.rows;
+        this.studentTotal = response.total;
+        this.getList();
+      });
+    },
+
     /** 查询选择导师任务列表 */
     getList() {
       this.loading = true;
-      listTeacher(this.queryParams).then(response => {
+      listTeacher(this.queryParams).then((response) => {
         this.teacherList = response.rows;
-        this.total = response.total;  
+        this.total = response.total;
         this.loading = false;
+        this.teacherList.forEach((item, index, array) => {
+          this.sum += item.quantity;
+        });
+        this.studentTotal -= this.sum;
       });
     },
     // 取消按钮
@@ -175,7 +233,7 @@ export default {
         title: null,
         quantity: null,
         description: null,
-        updateTime: null
+        updateTime: null,
       };
       this.resetForm("form");
     },
@@ -191,9 +249,9 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map((item) => item.id);
+      this.single = selection.length !== 1;
+      this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
     handleAdd() {
@@ -204,29 +262,39 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids
-      getTeacher(id).then(response => {
+      const id = row.id || this.ids;
+      getTeacher(id).then((response) => {
         this.form = response.data;
+        this.tmpStudentTotal = this.studentTotal;
+        this.tmpStudentTotal += row.quantity;
         this.open = true;
         this.title = "修改选择导师任务";
       });
     },
     /** 提交按钮 */
     submitForm() {
-      this.$refs["form"].validate(valid => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
-          if (this.form.id != null) {
-            updateTeacher(this.form).then(response => {
-              this.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
+          this.sum = 0;
+          this.tmpStudentTotal -= this.form.quantity;
+          if (this.tmpStudentTotal < 0) {
+            this.$message.warning("不能超出学生总人数!");
+            return;
           } else {
-            addTeacher(this.form).then(response => {
-              this.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
+            this.studentTotal -= this.form.quantity;
+            if (this.form.id != null) {
+              updateTeacher(this.form).then((response) => {
+                this.msgSuccess("修改成功");
+                this.open = false;
+                this.getStudentList();
+              });
+            } else {
+              addTeacher(this.form).then((response) => {
+                this.msgSuccess("新增成功");
+                this.open = false;
+                this.getList();
+              });
+            }
           }
         }
       });
@@ -234,23 +302,33 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$confirm('是否确认删除选择导师任务编号为"' + ids + '"的数据项?', "警告", {
+      this.$confirm(
+        '是否确认删除选择导师任务编号为"' + ids + '"的数据项?',
+        "警告",
+        {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
+          type: "warning",
+        }
+      )
+        .then(function () {
           return delTeacher(ids);
-        }).then(() => {
+        })
+        .then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
+        });
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('graduation/teacher/export', {
-        ...this.queryParams
-      }, `graduation_teacher.xlsx`)
-    }
-  }
+      this.download(
+        "graduation/teacher/export",
+        {
+          ...this.queryParams,
+        },
+        `graduation_teacher.xlsx`
+      );
+    },
+  },
 };
 </script>

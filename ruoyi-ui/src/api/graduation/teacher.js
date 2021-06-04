@@ -1,5 +1,14 @@
 import request from '@/utils/request'
 
+// 查询学生列表
+export function listStudnet(query) {
+  return request({
+    url: '/graduation/studentgen/list',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询选择导师任务列表
 export function listTeacher(query) {
   return request({

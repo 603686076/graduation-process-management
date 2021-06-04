@@ -35,7 +35,7 @@
           placeholder="选择结束时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="任务类型" prop="type">
+      <!-- <el-form-item label="任务类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择任务类型" clearable size="small">
           <el-option
             v-for="dict in typeOptions"
@@ -44,7 +44,7 @@
             :value="dict.dictValue"
           />
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
           <el-option
@@ -65,7 +65,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="上传文件名称规则" prop="uploadRegexName">
+      <!-- <el-form-item label="上传文件名称规则" prop="uploadRegexName">
         <el-input
           v-model="queryParams.uploadRegexName"
           placeholder="请输入上传文件名称规则"
@@ -73,8 +73,8 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="模板文件名称" prop="filename">
+      </el-form-item> -->
+      <!-- <el-form-item label="模板文件名称" prop="filename">
         <el-input
           v-model="queryParams.filename"
           placeholder="请输入模板文件名称"
@@ -82,8 +82,8 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="发布者ID" prop="teacherId">
+      </el-form-item> -->
+      <!-- <el-form-item label="发布者ID" prop="teacherId">
         <el-input
           v-model="queryParams.teacherId"
           placeholder="请输入发布者ID"
@@ -91,8 +91,8 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="文件类型后缀" prop="extName">
+      </el-form-item> -->
+      <!-- <el-form-item label="文件类型后缀" prop="extName">
         <el-input
           v-model="queryParams.extName"
           placeholder="请输入文件类型后缀"
@@ -100,7 +100,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -155,7 +155,7 @@
 
     <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="任务ID" align="center" prop="id" />
+      <!-- <el-table-column label="任务ID" align="center" prop="id" /> -->
       <el-table-column label="标题" align="center" prop="title" />
       <el-table-column label="描述" align="center" prop="description" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
@@ -168,13 +168,14 @@
           <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务类型" align="center" prop="type" :formatter="typeFormat" />
+      <!-- <el-table-column label="任务类型" align="center" prop="type" :formatter="typeFormat" /> -->
       <el-table-column label="状态" align="center" prop="status" :formatter="statusFormat" />
       <el-table-column label="完成角色" align="center" prop="target" :formatter="targetFormat" />
-      <el-table-column label="上传文件名称规则" align="center" prop="uploadRegexName" />
-      <el-table-column label="模板文件名称" align="center" prop="filename" />
-      <el-table-column label="发布者ID" align="center" prop="teacherId" />
-      <el-table-column label="文件类型后缀" align="center" prop="extName" />
+      <!-- <el-table-column label="模板文件名" align="center" prop="uploadRegexName" /> -->
+      <!-- 上传文件名称规则和模板文件名称弄反了,就这样吧,只能先反着了 -->
+       <el-table-column label="上传文件名称规则" align="center" prop="filename" />
+      <!-- <el-table-column label="发布者ID" align="center" prop="teacherId" />
+      <el-table-column label="文件类型后缀" align="center" prop="extName" />  -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -228,7 +229,7 @@
             placeholder="选择结束时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="任务类型" prop="type">
+        <!-- <el-form-item label="任务类型" prop="type">
           <el-select v-model="form.type" placeholder="请选择任务类型">
             <el-option
               v-for="dict in typeOptions"
@@ -237,7 +238,7 @@
               :value="dict.dictValue"
             ></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio
@@ -256,17 +257,17 @@
             >{{dict.dictLabel}}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="上传文件名称规则" prop="uploadRegexName">
-          <el-input v-model="form.uploadRegexName" placeholder="请输入上传文件名称规则" />
+        <el-form-item label="上传文件名称规则" prop="filename">
+          <el-input v-model="form.filename" placeholder="请输入上传文件名称规则" />
         </el-form-item>
-        <el-form-item label="模板文件名称" prop="filename">
+        <!-- <el-form-item label="模板文件名称" prop="filename">
           <el-input v-model="form.filename" placeholder="请输入模板文件名称" />
         </el-form-item>
         <el-form-item label="发布者ID" prop="teacherId">
           <el-input v-model="form.teacherId" placeholder="请输入发布者ID" />
         </el-form-item>
         <el-form-item label="文件类型后缀" prop="extName">
-          <el-input v-model="form.extName" placeholder="请输入文件类型后缀" />
+          <el-input v-model="form.extName" placeholder="请输入文件类型后缀" /> -->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -279,6 +280,7 @@
 
 <script>
 import { listTask, getTask, delTask, addTask, updateTask } from "@/api/graduation/task";
+import { getUserProfile } from "@/api/system/user";
 
 export default {
   name: "Task",
@@ -286,6 +288,8 @@ export default {
   },
   data() {
     return {
+      // 用户
+      user: {},
       // 遮罩层
       loading: true,
       // 选中数组
@@ -353,6 +357,7 @@ export default {
   },
   created() {
     this.getList();
+    this.getUser();
     this.getDicts("task_type").then(response => {
       this.typeOptions = response.data;
     });
@@ -364,6 +369,11 @@ export default {
     });
   },
   methods: {
+    getUser() {
+      getUserProfile().then((response) => {
+        this.user = response.data;
+      });
+    },
     /** 查询任务列表 */
     getList() {
       this.loading = true;
@@ -443,6 +453,8 @@ export default {
     },
     /** 提交按钮 */
     submitForm() {
+      this.form.teacherId =  this.user.userId;
+      this.form.type = 4;
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
