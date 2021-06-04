@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.graduation.mapper.TeacherSuggestionMapper">
+    
+    <resultMap type="TeacherSuggestion" id="TeacherSuggestionResult">
+        <result property="id"    column="id"    />
+        <result property="teacherId"    column="teacher_id"    />
+        <result property="studentId"    column="student_id"    />
+        <result property="taskId"    column="task_id"    />
+        <result property="suggestion"    column="suggestion"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTeacherSuggestionVo">
+        select id, teacher_id, student_id, task_id, suggestion, update_time from teacher_suggestion
+    </sql>
+
+    <select id="selectTeacherSuggestionList" parameterType="TeacherSuggestion" resultMap="TeacherSuggestionResult">
+        <include refid="selectTeacherSuggestionVo"/>
+        <where>  
+            <if test="teacherId != null "> and teacher_id = #{teacherId}</if>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+            <if test="taskId != null "> and task_id = #{taskId}</if>
+            <if test="suggestion != null  and suggestion != ''"> and suggestion = #{suggestion}</if>
+        </where>
+    </select>
+    
+    <select id="selectTeacherSuggestionById" parameterType="Long" resultMap="TeacherSuggestionResult">
+        <include refid="selectTeacherSuggestionVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTeacherSuggestion" parameterType="TeacherSuggestion" useGeneratedKeys="true" keyProperty="id">
+        insert into teacher_suggestion
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teacherId != null">teacher_id,</if>
+            <if test="studentId != null">student_id,</if>
+            <if test="taskId != null">task_id,</if>
+            <if test="suggestion != null">suggestion,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teacherId != null">#{teacherId},</if>
+            <if test="studentId != null">#{studentId},</if>
+            <if test="taskId != null">#{taskId},</if>
+            <if test="suggestion != null">#{suggestion},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTeacherSuggestion" parameterType="TeacherSuggestion">
+        update teacher_suggestion
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teacherId != null">teacher_id = #{teacherId},</if>
+            <if test="studentId != null">student_id = #{studentId},</if>
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="suggestion != null">suggestion = #{suggestion},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTeacherSuggestionById" parameterType="Long">
+        delete from teacher_suggestion where id = #{id}
+    </delete>
+
+    <delete id="deleteTeacherSuggestionByIds" parameterType="String">
+        delete from teacher_suggestion where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

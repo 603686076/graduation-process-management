@@ -1,5 +1,14 @@
 import request from '@/utils/request'
 
+// 查询教师学生关联列表
+export function listTeacherStudent(query) {
+  return request({
+    url: '/graduation/choose/listTeacherStudent',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询选择导师任务列表
 export function listTeacher(query) {
   return request({

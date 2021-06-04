@@ -8,7 +8,9 @@ import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.PreAuthorize;
 import com.ruoyi.graduation.domain.Teacher;
+import com.ruoyi.graduation.domain.TeacherStudent;
 import com.ruoyi.graduation.service.IChooseTeacherService;
+import com.ruoyi.graduation.service.ITeacherStudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,17 @@ public class ChooseTeacherController extends BaseController
 {
     @Autowired
     private IChooseTeacherService chooseTeacherService;
+
+    @Autowired
+    private ITeacherStudentService teacherStudentService;
+
+    @GetMapping("/listTeacherStudent")
+    public TableDataInfo listTeacherStudent(TeacherStudent teacherStudent)
+    {
+        startPage();
+        List<TeacherStudent> list = teacherStudentService.selectTeacherStudentList(teacherStudent);
+        return getDataTable(list);
+    }
 
     /**
      * 查询选择导师任务列表

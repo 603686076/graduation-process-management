@@ -26,12 +26,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="studentId != null "> and student_id = #{studentId}</if>
         </where>
     </select>
-    
+
     <select id="selectStudentTaskById" parameterType="Long" resultMap="StudentTaskResult">
         <include refid="selectStudentTaskVo"/>
         where id = #{id}
     </select>
-        
+
     <insert id="insertStudentTask" parameterType="StudentTask">
         insert into student_task
         <trim prefix="(" suffix=")" suffixOverrides=",">

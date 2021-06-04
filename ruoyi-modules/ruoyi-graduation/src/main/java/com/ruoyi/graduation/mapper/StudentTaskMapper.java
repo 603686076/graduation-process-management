@@ -58,4 +58,6 @@ public interface StudentTaskMapper
      * @return 结果
      */
     public int deleteStudentTaskByIds(Long[] ids);
+
+
 }
