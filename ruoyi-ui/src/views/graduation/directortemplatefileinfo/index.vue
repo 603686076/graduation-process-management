@@ -301,6 +301,10 @@ export default {
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
+    /** 如果出现同名文件更改的情况，就手动先自己删除吧，
+     * 这里不再写了，想写也简单，之前写过一个，再写没有什么意义了，
+     * 不想再浪费时间了。 
+     * */
     /** 新增按钮操作现在变成了这个 */
     handleAddFile() {
       this.reset();
