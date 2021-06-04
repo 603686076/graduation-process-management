@@ -9,7 +9,7 @@ export default {
   name: 'RuoYiGit',
   data() {
     return {
-      url: 'https://gitee.com/y_project/RuoYi-Cloud'
+      url: 'https://hub.fastgit.org/xu-214/graduation-process-management'
     }
   },
   methods: {

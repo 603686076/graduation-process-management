@@ -9,7 +9,7 @@ export default {
   name: 'RuoYiDoc',
   data() {
     return {
-      url: 'http://doc.ruoyi.vip/ruoyi-cloud'
+      url: 'https://hub.fastgit.org/xu-214/graduation-process-management/blob/master/README.md'
     }
   },
   methods: {
