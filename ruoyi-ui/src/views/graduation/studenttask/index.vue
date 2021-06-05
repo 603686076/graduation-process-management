@@ -221,8 +221,6 @@
         </div>
       </el-upload>
     </el-dialog>
-
-   
   </div>
 </template>
 
@@ -241,6 +239,7 @@ import {
   listStudentfileinfo,
 } from "@/api/graduation/studentfileinfo";
 import { getUserProfile } from "@/api/system/user";
+import { getStudentgen } from "@/api/graduation/studentgen";
 
 export default {
   name: "Studenttask",
@@ -418,21 +417,34 @@ export default {
       // 通过前端传入行数据获取fileName
       var list = row.filename.split(",");
       var result = "";
-      list.forEach((item, index, array) => {
-        if (item.charAt(0) == "@") {
-          if (item == "@学生姓名") {
-            result += this.user.nickName + "-";
+      var tmpTopic = "";
+      getStudentgen(this.user.userId).then((response) => {
+        tmpTopic = response.data.topic;
+        // 获取完tmpTopic再执行
+        list.forEach((item, index, array) => {
+          if (item.charAt(0) == "@") {
+            if (item == "@学生姓名") {
+              result += this.user.nickName + "-";
+            }
+            if (item == "@学号") {
+              result += this.user.userName + "-";
+            }
+            if (item == "@毕设题目") {
+              result += tmpTopic + "-";
+            }
+          } else {
+            index == array.length - 1
+              ? (result += item)
+              : (result += item + "-");
           }
-          if (item == "@学号") {
-            result += this.user.userName + "-";
-          }
-        } else {
-          index == array.length - 1 ? (result += item) : (result += item + "-");
-        }
+        });
+        this.resultFileName = result;
+        this.upload.url =
+          process.env.VUE_APP_BASE_API +
+          "/file/upload?fileNameP=" +
+          this.resultFileName;
+        console.log(this.upload.url);
       });
-      this.resultFileName = result;
-
-      this.upload.url = process.env.VUE_APP_BASE_API + "/file/upload?fileNameP=" + this.resultFileName;
     },
     handleUpdateFile() {
       this.flag = 2;
@@ -569,39 +581,48 @@ export default {
       // 通过前端传入行数据获取fileName
       var list = row.filename.split(",");
       var result = "";
-      list.forEach((item, index, array) => {
-        if (item.charAt(0) == "@") {
-          if (item == "@学生姓名") {
-            result += this.user.nickName + "-";
+      var tmpTopic = "";
+      getStudentgen(this.user.userId).then((response) => {
+        tmpTopic = response.data.topic;
+        // 获取完tmpTopic再执行
+        list.forEach((item, index, array) => {
+          if (item.charAt(0) == "@") {
+            if (item == "@学生姓名") {
+              result += this.user.nickName + "-";
+            }
+            if (item == "@学号") {
+              result += this.user.userName + "-";
+            }
+            if (item == "@毕设题目") {
+              result += tmpTopic + "-";
+            }
+          } else {
+            index == array.length - 1
+              ? (result += item)
+              : (result += item + "-");
           }
-          if (item == "@学号") {
-            result += this.user.userName + "-";
+        });
+        console.log(result);
+        this.fileFormReset();
+        this.fileForm.fileName = result;
+        console.log(this.fileForm);
+        listStudentfileinfo(this.fileForm).then((response) => {
+          this.studentfileinfoList = response.rows;
+          if (this.studentfileinfoList.length != 0) {
+            var url = this.studentfileinfoList[0].filePath;
+            var name = this.fileForm.fileName;
+            var suffix = url.substring(url.lastIndexOf("."), url.length);
+            const a = document.createElement("a");
+            a.setAttribute("download", name + suffix);
+            a.setAttribute("target", "_blank");
+            a.setAttribute("href", url);
+            a.click();
+          } else {
+            this.msgInfo("你还没有上传过文件哟~");
           }
-        } else {
-          index == array.length - 1 ? (result += item) : (result += item + "-");
-        }
+        });
+        // console.log(this.fileForm);
       });
-      console.log(result);
-
-      this.fileFormReset();
-      this.fileForm.fileName = result;
-      // console.log(this.fileForm);
-      listStudentfileinfo(this.fileForm).then((response) => {
-        this.studentfileinfoList = response.rows;
-        if (this.studentfileinfoList.length != 0) {
-          var url = this.studentfileinfoList[0].filePath;
-          var name = this.fileForm.fileName;
-          var suffix = url.substring(url.lastIndexOf("."), url.length);
-          const a = document.createElement("a");
-          a.setAttribute("download", name + suffix);
-          a.setAttribute("target", "_blank");
-          a.setAttribute("href", url);
-          a.click();
-        } else {
-          this.msgInfo("你还没有上传过文件哟~");
-        }
-      });
-      // console.log(this.fileForm);
     },
   },
 };
