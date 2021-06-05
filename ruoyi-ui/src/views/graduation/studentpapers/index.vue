@@ -307,6 +307,10 @@ export default {
         if (arr1[i].fielname != filename) {
           arr1.splice(i, 1);
         }
+        // 前端真尼玛恶心，一个单词错，我找了一上午的bug。。。
+        // if (arr1[i].fielname != filename) {
+        //   arr1.splice(i, 1);
+        // }
       }
     },
     /** 搜索查询操作 */

@@ -339,7 +339,7 @@ export default {
         this.suggestList = response.rows;
         // 如果不存在，返回还没有建议
         if (this.suggestList.length == 0) {
-          this.msgInfo("还没有建议呢");
+          this.msgInfo("教师还没有给出建议呢~");
         } else {
           // 如果存在，查看建议
           this.suggestionForm = this.suggestList[0];
