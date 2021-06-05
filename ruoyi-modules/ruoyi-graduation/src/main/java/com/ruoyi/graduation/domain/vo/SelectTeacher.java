@@ -1,8 +1,9 @@
 package com.ruoyi.graduation.domain.vo;
 
 import com.ruoyi.common.core.annotation.Excel;
+import com.ruoyi.common.core.web.domain.BaseEntity;
 
-public class SelectTeacher {
+public class SelectTeacher extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 用户ID */
