@@ -431,6 +431,8 @@ export default {
         }
       });
       this.resultFileName = result;
+
+      this.upload.url = process.env.VUE_APP_BASE_API + "/file/upload?fileNameP=" + this.resultFileName;
     },
     handleUpdateFile() {
       this.flag = 2;

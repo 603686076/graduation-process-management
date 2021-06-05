@@ -30,7 +30,7 @@ public class MinioSysFileServiceImpl implements ISysFileService
      * @throws Exception
      */
     @Override
-    public String uploadFile(MultipartFile file) throws Exception
+    public String uploadFile(MultipartFile file, String fileNameP) throws Exception
     {
         String fileName = FileUploadUtils.extractFilename(file);
         PutObjectArgs args = PutObjectArgs.builder()

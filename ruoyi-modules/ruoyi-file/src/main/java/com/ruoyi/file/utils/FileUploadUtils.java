@@ -2,6 +2,8 @@ package com.ruoyi.file.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.core.exception.file.FileNameLengthLimitExceededException;
@@ -37,11 +39,11 @@ public class FileUploadUtils
      * @return 文件名称
      * @throws IOException
      */
-    public static final String upload(String baseDir, MultipartFile file) throws IOException
+    public static final String upload(String baseDir, MultipartFile file, String fileNameP) throws IOException
     {
         try
         {
-            return upload(baseDir, file, MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION);
+            return upload(baseDir, file, MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, fileNameP);
         }
         catch (Exception e)
         {
@@ -61,7 +63,7 @@ public class FileUploadUtils
      * @throws IOException 比如读写文件出错时
      * @throws InvalidExtensionException 文件校验异常
      */
-    public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension)
+    public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension, String fileNameP)
             throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
             InvalidExtensionException
     {
@@ -73,12 +75,19 @@ public class FileUploadUtils
 
         assertAllowed(file, allowedExtension);
 
+        // 提取文件名（整个文件名，包括后缀）
         String fileName = extractFilename(file);
 
-        // 获取绝对路径
-        File desc = getAbsoluteFile(baseDir, fileName);
+        // 将文件名前面加上日期
+        fileNameP = DateUtils.datePath() + "/" + fileNameP;
+        // 把文件名后缀给加上
+        fileNameP += '.' + getExtension(file);
+        // 绝对路径(在这里将fileName改成了fileNameP，不再通过真实的文件名，而是通过url传递的参数）
+        File desc = getAbsoluteFile(baseDir, fileNameP);
+//        File desc = getAbsoluteFile(baseDir, fileName);
         file.transferTo(desc);
-        String pathFileName = getPathFileName(fileName);
+        String pathFileName = getPathFileName(fileNameP);
+//        String pathFileName = getPathFileName(fileName);
         return pathFileName;
     }
 
