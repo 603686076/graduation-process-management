@@ -78,17 +78,26 @@ public class FileUploadUtils
         // 提取文件名（整个文件名，包括后缀）
         String fileName = extractFilename(file);
 
-        // 将文件名前面加上日期
-        fileNameP = DateUtils.datePath() + "/" + fileNameP;
-        // 把文件名后缀给加上
-        fileNameP += '.' + getExtension(file);
-        // 绝对路径(在这里将fileName改成了fileNameP，不再通过真实的文件名，而是通过url传递的参数）
-        File desc = getAbsoluteFile(baseDir, fileNameP);
+        // 如果上传的是模板文件fileNameP是null
+        if (fileNameP.equals("")) {
+            File desc = getAbsoluteFile(baseDir, fileName);
+            file.transferTo(desc);
+            String pathFileName = getPathFileName(fileName);
+            return pathFileName;
+        } else {
+            // 将文件名前面加上日期
+             fileNameP = DateUtils.datePath() + "/" + fileNameP;
+            // 把文件名后缀给加上
+            fileNameP += '.' + getExtension(file);
+            // 绝对路径(在这里将fileName改成了fileNameP，不再通过真实的文件名，而是通过url传递的参数）
+            File desc = getAbsoluteFile(baseDir, fileNameP);
 //        File desc = getAbsoluteFile(baseDir, fileName);
-        file.transferTo(desc);
-        String pathFileName = getPathFileName(fileNameP);
+            file.transferTo(desc);
+            String pathFileName = getPathFileName(fileNameP);
 //        String pathFileName = getPathFileName(fileName);
-        return pathFileName;
+            return pathFileName;
+        }
+
     }
 
     /**

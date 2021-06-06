@@ -188,7 +188,7 @@
           >提交</el-button
         >
         <div slot="tip" class="el-upload__tip">
-          只能上传jpg/png文件，且不超过500kb
+          只能上传docx/doc文件，且不超过10M
         </div>
       </el-upload>
     </el-dialog>
@@ -311,6 +311,8 @@ export default {
       this.upload.open = true;
       this.upload.title = "新增模板文件";
       this.upload.fileList = [];
+      this.upload.url =
+        process.env.VUE_APP_BASE_API + "/file/upload?fileNameP=" + "";
     },
     /** 提交按钮操作 */
     submitFileForm() {
