@@ -304,7 +304,7 @@ export default {
     //JS获取交集
     intersection(arr1, filename) {
       for (var i = 0; i < arr1.length; i++) {
-        if (arr1[i].fielname != filename) {
+        if (arr1[i].filename != filename) {
           arr1.splice(i, 1);
         }
         // 前端真尼玛恶心，一个单词错，我找了一上午的bug。。。
