@@ -199,9 +199,8 @@ export default {
     };
   },
   created() {
-    this.getList();
     this.getUser();
-    this.getHasChoose();
+    this.getList();
   },
   methods: {
     /** 查询这个学生是否已经选过导师 */
@@ -209,19 +208,18 @@ export default {
       this.queryTeacherStudentParams = {
         pageNum: 1,
         pageSize: 10,
-        studentId: this.user.userId,
+        studentId: this.user.userId,  
       };
       // 把这个学生id传给后台，查teacher_student有没有student_id等于这个学生id的数据
       listTeacherStudent(this.queryTeacherStudentParams).then((response) => {
-        this.teacherStudentList = response.rows;
+        this.teacherStudentList = response.rows;  
         // 查询出来有数据，说明这个学生已经选过导师了，选择按钮不再显示
         if (this.teacherStudentList.length != 0) {
           this.buttonFlag = 2;
         } else {
           this.buttonFlag = 1;
         }
-        this.getHasChoose();
-      });
+      });      
     },
     /** 查询选择导师任务列表 */
     getList() {
@@ -235,6 +233,7 @@ export default {
     getUser() {
       getUserProfile().then((response) => {
         this.user = response.data;
+        this.getHasChoose();
       });
     },
     // 取消按钮
@@ -342,7 +341,6 @@ export default {
         } else {
           this.msgInfo("你选择的不是这个导师哟~");
         }
-        this.getHasChoose();
       });
     },
     /** 提交按钮 */
@@ -351,15 +349,17 @@ export default {
         if (valid) {
           if (this.flag == 2) {
             updateStudent(this.chooseForm).then((response) => {
-              this.msgSuccess("取消选择导师成功");
+              this.msgSuccess("取消选择导师成功，准备刷新页面");
               this.open = false;
               this.getList();
+              setTimeout("window.location.reload()", 2500);
             });
           } else {
             addStudent(this.chooseForm).then((response) => {
-              this.msgSuccess("选择导师成功");
+              this.msgSuccess("选择导师成功，准备刷新页面");
               this.open = false;
               this.getList();
+              setTimeout("window.location.reload()", 2500);
             });
           }
         }
